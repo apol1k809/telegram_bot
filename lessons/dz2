@@ -33,7 +33,6 @@ def make_field():
             if field[nx][ny] != "~":
                 return False
 
-            # Проверка вокруг клетки (чтобы корабли не касались)
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
                     xx = nx + dx
