@@ -1,62 +1,54 @@
-import random
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-import asyncio
+from aiogram.types import (
+    ReplyKeyboardMarkup, KeyboardButton,
+    InlineKeyboardMarkup, InlineKeyboardButton
+)
 
 TOKEN = "7948845009:AAGP2dbQ-IJaLYi9uy5juxQQAztVw1JAY9w"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-keyboard = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Камень")],
-        [KeyboardButton(text="Ножницы")],
-        [KeyboardButton(text="Бумага")]
-    ],
-    resize_keyboard=True
-)
-
-choices = ["Камень", "Ножницы", "Бумага"]
-
-
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer(
-        "Привет! Давай сыграем в Камень–Ножницы–Бумага.\n"
-        "Выбери свой вариант:",
-        reply_markup=keyboard
-    )
-
+    await message.answer("Привет! Напиши мне любое сообщение — я отвечу кнопками.")
 
 @dp.message()
-async def game(message: types.Message):
-    user_choice = message.text
+async def send_buttons(message: types.Message):
 
-    if user_choice not in choices:
-        await message.answer("Выбери один из вариантов на клавиатуре.")
-        return
-
-    bot_choice = random.choice(choices)
-
-    if user_choice == bot_choice:
-        result = "Ничья!"
-    elif (
-        (user_choice == "Камень" and bot_choice == "Ножницы") or
-        (user_choice == "Ножницы" and bot_choice == "Бумага") or
-        (user_choice == "Бумага" and bot_choice == "Камень")
-    ):
-        result = "Ты победил!"
-    else:
-        result = "Я победил!"
-
-    await message.answer(
-        f"Ты выбрал: {user_choice}\n"
-        f"Я выбрал: {bot_choice}\n\n"
-        f"Результат: {result}"
+    reply_kb = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Привет"), KeyboardButton(text="Как дела?")],
+            [KeyboardButton(text="Пока")]
+        ],
+        resize_keyboard=True
     )
 
+    inline_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Нажми меня", callback_data="btn_press")],
+            [InlineKeyboardButton(text="Открыть сайт", url="https://google.com")]
+        ]
+    )
+
+    await message.answer(
+        "Вот твои кнопки!\n"
+        "— Reply‑кнопки внизу\n"
+        "— Inline‑кнопки под этим сообщением",
+        reply_markup=reply_kb
+    )
+
+    await message.answer(
+        "Inline‑кнопки:",
+        reply_markup=inline_kb
+    )
+
+@dp.callback_query(lambda c: c.data == "btn_press")
+async def callback_handler(callback: types.CallbackQuery):
+    await callback.message.answer("Ты нажал inline‑кнопку!")
+    await callback.answer()
 
 async def main():
     await dp.start_polling(bot)
