@@ -1,0 +1,66 @@
+import random
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+import asyncio
+
+TOKEN = "7948845009:AAGP2dbQ-IJaLYi9uy5juxQQAztVw1JAY9w"
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Камень")],
+        [KeyboardButton(text="Ножницы")],
+        [KeyboardButton(text="Бумага")]
+    ],
+    resize_keyboard=True
+)
+
+choices = ["Камень", "Ножницы", "Бумага"]
+
+
+@dp.message(Command("start"))
+async def start(message: types.Message):
+    await message.answer(
+        "Привет! Давай сыграем в Камень–Ножницы–Бумага.\n"
+        "Выбери свой вариант:",
+        reply_markup=keyboard
+    )
+
+
+@dp.message()
+async def game(message: types.Message):
+    user_choice = message.text
+
+    if user_choice not in choices:
+        await message.answer("Выбери один из вариантов на клавиатуре.")
+        return
+
+    bot_choice = random.choice(choices)
+
+    if user_choice == bot_choice:
+        result = "Ничья!"
+    elif (
+        (user_choice == "Камень" and bot_choice == "Ножницы") or
+        (user_choice == "Ножницы" and bot_choice == "Бумага") or
+        (user_choice == "Бумага" and bot_choice == "Камень")
+    ):
+        result = "Ты победил!"
+    else:
+        result = "Я победил!"
+
+    await message.answer(
+        f"Ты выбрал: {user_choice}\n"
+        f"Я выбрал: {bot_choice}\n\n"
+        f"Результат: {result}"
+    )
+
+
+async def main():
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
